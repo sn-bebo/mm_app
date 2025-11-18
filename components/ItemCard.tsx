@@ -5,17 +5,26 @@ import { TravelItem, CategoryType, StatusType } from '@/types';
 import StarRating from './StarRating';
 import PriorityBadge from './PriorityBadge';
 import UserNotes from './UserNotes';
+import { useAppStore } from '@/stores/appStore';
+import { db } from '@/lib/db';
 
 interface ItemCardProps {
   item: TravelItem;
   onUpdate: (updates: Partial<TravelItem>) => void;
+  onDelete?: () => void;
   isExpanded?: boolean;
 }
 
-export default function ItemCard({ item, onUpdate, isExpanded: initialExpanded = false }: ItemCardProps) {
+export default function ItemCard({ item, onUpdate, onDelete, isExpanded: initialExpanded = false }: ItemCardProps) {
   const [isExpanded, setIsExpanded] = useState(initialExpanded);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [locationInput, setLocationInput] = useState('');
+  const [isEditingItem, setIsEditingItem] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [detailsInput, setDetailsInput] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  const isAdminMode = useAppStore((state) => state.isAdminMode);
   
   const isCompleted = ['visited', 'purchased', 'tasted'].includes(item.status);
   
@@ -70,6 +79,38 @@ export default function ItemCard({ item, onUpdate, isExpanded: initialExpanded =
     setLocationInput('');
   };
   
+  const handleEditItem = () => {
+    setNameInput(item.name);
+    setDetailsInput(item.details);
+    setIsEditingItem(true);
+  };
+  
+  const handleSaveItem = () => {
+    if (nameInput.trim()) {
+      onUpdate({ 
+        name: nameInput.trim(),
+        details: detailsInput.trim()
+      });
+      setIsEditingItem(false);
+      setNameInput('');
+      setDetailsInput('');
+    }
+  };
+  
+  const handleCancelItemEdit = () => {
+    setIsEditingItem(false);
+    setNameInput('');
+    setDetailsInput('');
+  };
+  
+  const handleDelete = async () => {
+    if (onDelete) {
+      await db.items.delete(item.id);
+      onDelete();
+    }
+    setShowDeleteConfirm(false);
+  };
+  
   return (
     <div
       className={`bg-white dark:bg-gray-800 rounded-lg shadow border-2 transition-all ${
@@ -86,26 +127,82 @@ export default function ItemCard({ item, onUpdate, isExpanded: initialExpanded =
       <div className="p-4">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1">
-            <div className="flex items-start gap-2">
-              <h3 className={`text-lg font-bold ${isCompleted ? 'line-through text-gray-500 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
-                {item.name}
-              </h3>
-              {item.subcategory && (
-                <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-1 rounded whitespace-nowrap capitalize">
-                  {item.subcategory}
-                </span>
-              )}
-              {item.isAdminAdded && (
-                <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 px-2 py-1 rounded whitespace-nowrap" title="Added via Admin Panel">
-                  ✏️ Custom
-                </span>
-              )}
-            </div>
-            
-            {item.details && (
-              <p className={`text-sm mt-1 ${isCompleted ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'}`}>
-                {item.details}
-              </p>
+            {!isEditingItem ? (
+              <>
+                <div className="flex items-start gap-2">
+                  <h3 className={`text-lg font-bold ${isCompleted ? 'line-through text-gray-500 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                    {item.name}
+                  </h3>
+                  {item.subcategory && (
+                    <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-1 rounded whitespace-nowrap capitalize">
+                      {item.subcategory}
+                    </span>
+                  )}
+                  {item.isAdminAdded && (
+                    <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 px-2 py-1 rounded whitespace-nowrap" title="Added via Admin Panel">
+                      ✏️ Custom
+                    </span>
+                  )}
+                  <button
+                    onClick={handleEditItem}
+                    className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    title="Edit name and details"
+                  >
+                    ✏️
+                  </button>
+                </div>
+                
+                {item.details && (
+                  <p className={`text-sm mt-1 ${isCompleted ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400'}`}>
+                    {item.details}
+                  </p>
+                )}
+              </>
+            ) : (
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Item Name
+                  </label>
+                  <input
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Details/Notes
+                  </label>
+                  <textarea
+                    value={detailsInput}
+                    onChange={(e) => setDetailsInput(e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveItem}
+                    disabled={!nameInput.trim()}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
+                      nameInput.trim()
+                        ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
+                        : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    💾 Save
+                  </button>
+                  <button
+                    onClick={handleCancelItemEdit}
+                    className="px-4 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
+                  >
+                    ✕ Cancel
+                  </button>
+                </div>
+              </div>
             )}
           </div>
           
@@ -272,6 +369,40 @@ export default function ItemCard({ item, onUpdate, isExpanded: initialExpanded =
             <p>Last updated: {new Date(item.updatedAt).toLocaleDateString()}</p>
             {item.isAdminAdded && <p className="text-blue-600 dark:text-blue-400">✨ Added by admin</p>}
           </div>
+          
+          {/* Delete Button (Admin Mode Only) */}
+          {isAdminMode && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              {!showDeleteConfirm ? (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-sm font-medium"
+                >
+                  🗑️ Delete Item
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                    ⚠️ Are you sure you want to delete "{item.name}"?
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDelete}
+                      className="flex-1 px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-800 transition-colors text-sm font-medium"
+                    >
+                      Yes, Delete
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

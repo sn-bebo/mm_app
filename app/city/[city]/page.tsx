@@ -39,6 +39,11 @@ export default function CityPage({ params }: { params: { city: string } }) {
   const { items: allItems } = useItems(decodedCity);
   const updateItem = useUpdateItem();
   
+  const handleDelete = async (itemId: string) => {
+    // Item will be automatically removed from the list due to live query
+    // Just need to trigger a re-render if needed
+  };
+  
   // Apply global search first (across all categories in this city)
   const searchFilteredItems = useMemo(() => {
     if (!searchQuery) return allItems;
@@ -357,6 +362,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
                         <ItemCard
                           item={item}
                           onUpdate={(updates) => handleUpdate(item.id, updates)}
+                          onDelete={() => handleDelete(item.id)}
                         />
                       </DraggableItem>
                     ))}
@@ -417,6 +423,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
                             <ItemCard
                               item={item}
                               onUpdate={(updates) => handleUpdate(item.id, updates)}
+                              onDelete={() => handleDelete(item.id)}
                             />
                           </DraggableItem>
                         ))}
