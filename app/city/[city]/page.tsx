@@ -152,7 +152,16 @@ export default function CityPage({ params }: { params: { city: string } }) {
     const completed = categoryItems.filter(item => 
       ['visited', 'purchased', 'tasted'].includes(item.status)
     ).length;
-    return { total, completed, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
+    const withLocation = categoryItems.filter(item => item.location).length;
+    const withoutLocation = total - withLocation;
+    return { 
+      total, 
+      completed, 
+      percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+      withLocation,
+      withoutLocation,
+      locationPercentage: total > 0 ? Math.round((withLocation / total) * 100) : 0
+    };
   }, [categoryItems]);
   
   const handleUpdate = async (itemId: string, updates: Partial<TravelItem>) => {
@@ -277,20 +286,44 @@ export default function CityPage({ params }: { params: { city: string } }) {
       
       {/* Progress Bar */}
       {categoryProgress.total > 0 && (
-        <div className="bg-white border-b py-3">
-          <div className="max-w-7xl mx-auto px-4">
+        <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 py-3">
+          <div className="max-w-7xl mx-auto px-4 space-y-3">
+            {/* Completion Progress */}
             <div className="flex items-center gap-4">
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700">Progress</span>
-                  <span className="text-sm font-bold text-gray-900">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Completion Progress</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-white">
                     {categoryProgress.completed} / {categoryProgress.total} ({categoryProgress.percentage}%)
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div 
-                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                    className="bg-green-500 dark:bg-green-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${categoryProgress.percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Location Progress */}
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Locations Added</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-white">
+                    {categoryProgress.withLocation} / {categoryProgress.total} ({categoryProgress.locationPercentage}%)
+                    {categoryProgress.withoutLocation > 0 && (
+                      <span className="ml-2 text-xs text-orange-600 dark:text-orange-400">
+                        ({categoryProgress.withoutLocation} missing)
+                      </span>
+                    )}
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-blue-500 dark:bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${categoryProgress.locationPercentage}%` }}
                   ></div>
                 </div>
               </div>

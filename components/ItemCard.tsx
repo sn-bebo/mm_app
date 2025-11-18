@@ -14,6 +14,8 @@ interface ItemCardProps {
 
 export default function ItemCard({ item, onUpdate, isExpanded: initialExpanded = false }: ItemCardProps) {
   const [isExpanded, setIsExpanded] = useState(initialExpanded);
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [locationInput, setLocationInput] = useState('');
   
   const isCompleted = ['visited', 'purchased', 'tasted'].includes(item.status);
   
@@ -41,6 +43,31 @@ export default function ItemCard({ item, onUpdate, isExpanded: initialExpanded =
     if (item.location) {
       window.open(item.location, '_blank', 'noopener,noreferrer');
     }
+  };
+  
+  const searchOnMaps = () => {
+    // Create Google Maps search URL with item name and city
+    const searchQuery = encodeURIComponent(`${item.name}, ${item.city}`);
+    const searchUrl = `https://www.google.com/maps/search/${searchQuery}`;
+    window.open(searchUrl, '_blank', 'noopener,noreferrer');
+  };
+  
+  const handleEditLocation = () => {
+    setLocationInput(item.location || '');
+    setIsEditingLocation(true);
+  };
+  
+  const handleSaveLocation = () => {
+    if (locationInput.trim()) {
+      onUpdate({ location: locationInput.trim() });
+      setIsEditingLocation(false);
+      setLocationInput('');
+    }
+  };
+  
+  const handleCancelEdit = () => {
+    setIsEditingLocation(false);
+    setLocationInput('');
   };
   
   return (
@@ -122,27 +149,113 @@ export default function ItemCard({ item, onUpdate, isExpanded: initialExpanded =
         </div>
         
         {/* Action Buttons */}
-        <div className="flex gap-2">
-          <button
-            onClick={openLocation}
-            disabled={!item.location}
-            className={`flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-              item.location
-                ? 'bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed'
-            }`}
-            title={item.location || 'No location set'}
-          >
-            <span>📍</span>
-            <span>{item.location ? 'View on Map' : 'No Location'}</span>
-          </button>
-          
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          >
-            {isExpanded ? '▲ Less' : '▼ Notes'}
-          </button>
+        <div className="space-y-2">
+          {!isEditingLocation ? (
+            <>
+              <div className="flex gap-2">
+                {item.location ? (
+                  <>
+                    <button
+                      onClick={openLocation}
+                      className="flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-700"
+                      title="Open location in Google Maps"
+                    >
+                      <span>🗺️</span>
+                      <span>View on Map</span>
+                    </button>
+                    <button
+                      onClick={handleEditLocation}
+                      className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      title="Edit location URL"
+                    >
+                      ✏️
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={searchOnMaps}
+                      className="flex-1 px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 bg-orange-500 dark:bg-orange-600 text-white hover:bg-orange-600 dark:hover:bg-orange-700"
+                      title="Search this place on Google Maps"
+                    >
+                      <span>🔍</span>
+                      <span>Search on Maps</span>
+                    </button>
+                    <button
+                      onClick={handleEditLocation}
+                      className="px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors"
+                      title="Add location URL"
+                    >
+                      ➕ Add
+                    </button>
+                  </>
+                )}
+                
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  {isExpanded ? '▲ Less' : '▼ Notes'}
+                </button>
+              </div>
+              
+              {!item.location && (
+                <div className="text-xs text-orange-600 dark:text-orange-400 flex items-center gap-1">
+                  <span>⚠️</span>
+                  <span>No location set - Click "Search on Maps" to find it, then "Add" to save the URL</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    📍 Google Maps URL
+                  </label>
+                  <input
+                    type="url"
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                    placeholder="https://maps.google.com/..."
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    autoFocus
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={searchOnMaps}
+                  className="flex-1 px-3 py-2 bg-orange-500 dark:bg-orange-600 text-white rounded-lg hover:bg-orange-600 dark:hover:bg-orange-700 transition-colors text-sm flex items-center justify-center gap-1"
+                >
+                  <span>🔍</span>
+                  <span>Search First</span>
+                </button>
+                <button
+                  onClick={handleSaveLocation}
+                  disabled={!locationInput.trim()}
+                  className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
+                    locationInput.trim()
+                      ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
+                      : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  💾 Save
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                💡 Tip: Click "Search First" to find the location, then copy the URL from your browser and paste it above
+              </p>
+            </div>
+          )}
         </div>
       </div>
       
