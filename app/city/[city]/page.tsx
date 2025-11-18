@@ -1,0 +1,414 @@
+'use client';
+
+import Link from 'next/link';
+import { useItems, useUpdateItem } from '@/hooks/useItems';
+import { CategoryType, TravelItem, SortType, PriorityType, StatusType } from '@/types';
+import { useState, useMemo } from 'react';
+import ItemCard from '@/components/ItemCard';
+import FilterSortPanel from '@/components/FilterSortPanel';
+import ActiveFilters from '@/components/ActiveFilters';
+import DraggableItem from '@/components/DraggableItem';
+import Header from '@/components/Header';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
+export default function CityPage({ params }: { params: { city: string } }) {
+  const decodedCity = decodeURIComponent(params.city);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType>('places');
+  
+  // Filter and sort state
+  const [sortBy, setSortBy] = useState<SortType>('manual');
+  const [filterPriority, setFilterPriority] = useState<PriorityType | 'all'>('all');
+  const [filterStatus, setFilterStatus] = useState<StatusType | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const { items: allItems } = useItems(decodedCity);
+  const updateItem = useUpdateItem();
+  
+  // Apply global search first (across all categories in this city)
+  const searchFilteredItems = useMemo(() => {
+    if (!searchQuery) return allItems;
+    
+    const query = searchQuery.toLowerCase();
+    return allItems.filter(item => 
+      item.name.toLowerCase().includes(query) || 
+      item.details.toLowerCase().includes(query)
+    );
+  }, [allItems, searchQuery]);
+  
+  // Filter by category
+  const categoryItems = useMemo(() => {
+    let filtered = searchFilteredItems.filter(item => item.category === selectedCategory);
+    
+    // Apply priority filter
+    if (filterPriority !== 'all') {
+      filtered = filtered.filter(item => item.priority === filterPriority);
+    }
+    
+    // Apply status filter
+    if (filterStatus !== 'all') {
+      if (filterStatus === 'pending') {
+        filtered = filtered.filter(item => item.status === 'pending');
+      } else {
+        // Any completed status
+        filtered = filtered.filter(item => ['visited', 'purchased', 'tasted'].includes(item.status));
+      }
+    }
+    
+    return filtered;
+  }, [searchFilteredItems, selectedCategory, filterPriority, filterStatus]);
+  
+  // Separate items by subcategory
+  const { regularItems, subcategoryGroups } = useMemo(() => {
+    const regular = categoryItems.filter(item => !item.subcategory);
+    const withSubcategory = categoryItems.filter(item => item.subcategory);
+    
+    // Group by subcategory
+    const groups: Record<string, TravelItem[]> = {};
+    withSubcategory.forEach(item => {
+      const subcat = item.subcategory!;
+      if (!groups[subcat]) {
+        groups[subcat] = [];
+      }
+      groups[subcat].push(item);
+    });
+    
+    return { regularItems: regular, subcategoryGroups: groups };
+  }, [categoryItems]);
+  
+  // Sort items: pending first, then completed
+  const sortItems = (items: TravelItem[]) => {
+    let sorted = [...items];
+    
+    // Apply sorting
+    switch (sortBy) {
+      case 'name':
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'rating':
+        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'priority':
+        sorted.sort((a, b) => {
+          const priorityOrder = { must: 3, optional: 2, null: 1 };
+          return (priorityOrder[b.priority || 'null'] || 0) - (priorityOrder[a.priority || 'null'] || 0);
+        });
+        break;
+      case 'manual':
+      default:
+        sorted.sort((a, b) => a.sortOrder - b.sortOrder);
+        break;
+    }
+    
+    // Always keep completed items at bottom (unless filtering by status)
+    if (filterStatus === 'all') {
+      const pending = sorted.filter(item => item.status === 'pending');
+      const completed = sorted.filter(item => item.status !== 'pending');
+      return [...pending, ...completed];
+    }
+    
+    return sorted;
+  };
+  
+  const sortedRegularItems = useMemo(() => sortItems(regularItems), [regularItems, sortBy, filterStatus]);
+  
+  // Sort each subcategory group
+  const sortedSubcategoryGroups = useMemo(() => {
+    const sorted: Record<string, TravelItem[]> = {};
+    Object.keys(subcategoryGroups).forEach(key => {
+      sorted[key] = sortItems(subcategoryGroups[key]);
+    });
+    return sorted;
+  }, [subcategoryGroups, sortBy, filterStatus]);
+  
+  // Category counts (with search applied)
+  const categoryCounts = useMemo(() => ({
+    places: searchFilteredItems.filter(i => i.category === 'places').length,
+    shopping: searchFilteredItems.filter(i => i.category === 'shopping').length,
+    food: searchFilteredItems.filter(i => i.category === 'food').length,
+  }), [searchFilteredItems]);
+  
+  // Show total count when searching
+  const totalSearchResults = useMemo(() => 
+    searchQuery ? searchFilteredItems.length : 0,
+  [searchQuery, searchFilteredItems]);
+  
+  const categoryProgress = useMemo(() => {
+    const total = categoryItems.length;
+    const completed = categoryItems.filter(item => 
+      ['visited', 'purchased', 'tasted'].includes(item.status)
+    ).length;
+    return { total, completed, percentage: total > 0 ? Math.round((completed / total) * 100) : 0 };
+  }, [categoryItems]);
+  
+  const handleUpdate = async (itemId: string, updates: Partial<TravelItem>) => {
+    await updateItem(itemId, updates);
+  };
+  
+  const clearAllFilters = () => {
+    setSortBy('manual');
+    setFilterPriority('all');
+    setFilterStatus('all');
+    setSearchQuery('');
+  };
+  
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px movement required before drag starts
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200, // 200ms delay for touch to prevent accidental drags
+        tolerance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+  
+  // Handle drag end for regular items
+  const handleDragEndRegular = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) return;
+    
+    const oldIndex = sortedRegularItems.findIndex(item => item.id === active.id);
+    const newIndex = sortedRegularItems.findIndex(item => item.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) return;
+    
+    // Reorder the array
+    const reordered = arrayMove(sortedRegularItems, oldIndex, newIndex);
+    
+    // Update sortOrder for all affected items
+    const updates = reordered.map((item, index) => ({
+      id: item.id,
+      sortOrder: index,
+    }));
+    
+    // Batch update all items
+    await Promise.all(
+      updates.map(({ id, sortOrder }) => updateItem(id, { sortOrder }))
+    );
+  };
+  
+  const isDraggingEnabled = sortBy === 'manual';
+  
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <Header title={decodedCity} showHomeButton={true} showAdminButton={true} />
+      
+      {/* Category Tabs */}
+      <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-[73px] z-10">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Search Results Summary */}
+          {searchQuery && (
+            <div className="py-2 px-4 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                🔍 Found <span className="font-bold">{totalSearchResults}</span> result{totalSearchResults !== 1 ? 's' : ''} for "{searchQuery}" across all categories
+              </p>
+            </div>
+          )}
+          
+          <div className="flex gap-2 overflow-x-auto">
+            <button
+              onClick={() => setSelectedCategory('places')}
+              className={`px-6 py-3 font-medium whitespace-nowrap border-b-2 transition-colors ${
+                selectedCategory === 'places'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              🏛️ Places to Visit ({categoryCounts.places})
+            </button>
+            <button
+              onClick={() => setSelectedCategory('shopping')}
+              className={`px-6 py-3 font-medium whitespace-nowrap border-b-2 transition-colors ${
+                selectedCategory === 'shopping'
+                  ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              🛍️ Shopping ({categoryCounts.shopping})
+            </button>
+            <button
+              onClick={() => setSelectedCategory('food')}
+              className={`px-6 py-3 font-medium whitespace-nowrap border-b-2 transition-colors ${
+                selectedCategory === 'food'
+                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
+            >
+              🍽️ Food Spots ({categoryCounts.food})
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      {/* Active Filters */}
+      <ActiveFilters
+        sortBy={sortBy}
+        filterPriority={filterPriority}
+        filterStatus={filterStatus}
+        searchQuery={searchQuery}
+        onRemoveSort={() => setSortBy('manual')}
+        onRemovePriority={() => setFilterPriority('all')}
+        onRemoveStatus={() => setFilterStatus('all')}
+        onRemoveSearch={() => setSearchQuery('')}
+      />
+      
+      {/* Progress Bar */}
+      {categoryProgress.total > 0 && (
+        <div className="bg-white border-b py-3">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-gray-700">Progress</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {categoryProgress.completed} / {categoryProgress.total} ({categoryProgress.percentage}%)
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${categoryProgress.percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Items List */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {categoryItems.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No items in this category yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Regular Items */}
+            {sortedRegularItems.length > 0 && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEndRegular}
+              >
+                <SortableContext
+                  items={sortedRegularItems.map(item => item.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-4">
+                    {sortedRegularItems.map((item) => (
+                      <DraggableItem key={item.id} id={item.id} isDraggingEnabled={isDraggingEnabled}>
+                        <ItemCard
+                          item={item}
+                          onUpdate={(updates) => handleUpdate(item.id, updates)}
+                        />
+                      </DraggableItem>
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+            
+            {/* Subcategory Sections */}
+            {Object.keys(sortedSubcategoryGroups).map((subcategoryName) => {
+              const subcategoryItems = sortedSubcategoryGroups[subcategoryName];
+              
+              // Create unique drag handler for each subcategory
+              const handleDragEndForSubcategory = async (event: DragEndEvent) => {
+                const { active, over } = event;
+                
+                if (!over || active.id === over.id) return;
+                
+                const oldIndex = subcategoryItems.findIndex(item => item.id === active.id);
+                const newIndex = subcategoryItems.findIndex(item => item.id === over.id);
+                
+                if (oldIndex === -1 || newIndex === -1) return;
+                
+                const reordered = arrayMove(subcategoryItems, oldIndex, newIndex);
+                
+                const updates = reordered.map((item, index) => ({
+                  id: item.id,
+                  sortOrder: index + 1000,
+                }));
+                
+                await Promise.all(
+                  updates.map(({ id, sortOrder }) => updateItem(id, { sortOrder }))
+                );
+              };
+              
+              return (
+                <div key={subcategoryName} className="mt-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-px bg-gray-300 flex-1"></div>
+                    <h2 className="text-lg font-bold text-purple-700 px-4 capitalize">
+                      {subcategoryName}
+                    </h2>
+                    <div className="h-px bg-gray-300 flex-1"></div>
+                  </div>
+                  
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEndForSubcategory}
+                  >
+                    <SortableContext
+                      items={subcategoryItems.map(item => item.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-4">
+                        {subcategoryItems.map((item) => (
+                          <DraggableItem key={item.id} id={item.id} isDraggingEnabled={isDraggingEnabled}>
+                            <ItemCard
+                              item={item}
+                              onUpdate={(updates) => handleUpdate(item.id, updates)}
+                            />
+                          </DraggableItem>
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </main>
+      
+      {/* Filter & Sort Panel */}
+      <FilterSortPanel
+        sortBy={sortBy}
+        filterPriority={filterPriority}
+        filterStatus={filterStatus}
+        searchQuery={searchQuery}
+        onSortChange={setSortBy}
+        onPriorityFilterChange={setFilterPriority}
+        onStatusFilterChange={setFilterStatus}
+        onSearchChange={setSearchQuery}
+        onClearAll={clearAllFilters}
+      />
+    </div>
+  );
+}
