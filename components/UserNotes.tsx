@@ -33,17 +33,17 @@ export default function UserNotes({ notes, onChange, placeholder = 'Add your per
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-700">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
           📝 Your Notes
         </label>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          {isSaving && <span className="text-blue-500">Saving...</span>}
+        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          {isSaving && <span className="text-blue-500 dark:text-blue-400">Saving...</span>}
           {lastSaved && !isSaving && (
-            <span className="text-green-600">
+            <span className="text-green-600 dark:text-green-400">
               ✓ Saved
             </span>
           )}
-          <span className={remaining < 50 ? 'text-orange-500' : ''}>
+          <span className={remaining < 50 ? 'text-orange-500 dark:text-orange-400' : ''}>
             {remaining} chars left
           </span>
         </div>
@@ -54,7 +54,7 @@ export default function UserNotes({ notes, onChange, placeholder = 'Add your per
         onChange={(e) => setLocalNotes(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         rows={4}
-        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
       />
     </div>
   );

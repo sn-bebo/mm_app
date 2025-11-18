@@ -206,7 +206,7 @@ export default function AdminPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* City Field */}
                 <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     City <span className="text-red-500">*</span>
                   </label>
                   <div className="space-y-2">
@@ -215,7 +215,7 @@ export default function AdminPage() {
                         id="city-select"
                         value={cities.includes(formData.city) ? formData.city : ''}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">-- Select existing or type below --</option>
                         {cities.map((city) => (
@@ -230,7 +230,7 @@ export default function AdminPage() {
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder={mode === 'add' ? "Or type a new city name..." : "City name"}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     />
                     
@@ -244,14 +244,14 @@ export default function AdminPage() {
                 
                 {/* Category Field */}
                 <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Category <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="category"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value as CategoryType })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
                     <option value="places">🏛️ Places to Visit</option>
@@ -262,7 +262,7 @@ export default function AdminPage() {
                 
                 {/* Subcategory Field */}
                 <div>
-                  <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Subcategory <span className="text-gray-400">(Optional)</span>
                   </label>
                   <input
@@ -271,7 +271,7 @@ export default function AdminPage() {
                     value={formData.subcategory}
                     onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
                     placeholder="e.g., Abaya-Thobe, Historical, Modern, etc."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Use subcategories to group similar items together
@@ -280,7 +280,7 @@ export default function AdminPage() {
                 
                 {/* Item Name Field */}
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Item / Place Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -289,14 +289,14 @@ export default function AdminPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., Grand Mosque, Al Baik Restaurant, Gold Souq"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </div>
                 
                 {/* Details/Notes Field */}
                 <div>
-                  <label htmlFor="details" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="details" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Details / Notes
                   </label>
                   <textarea
@@ -311,7 +311,7 @@ export default function AdminPage() {
                 
                 {/* Location Link Field */}
                 <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Google Maps Location Link
                   </label>
                   <input
@@ -320,7 +320,7 @@ export default function AdminPage() {
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="https://maps.google.com/..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Optional: Paste a Google Maps link for easy navigation
@@ -414,7 +414,7 @@ export default function AdminPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Search Name/Details
                   </label>
                   <input
@@ -422,7 +422,7 @@ export default function AdminPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Type to search..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg text-sm"
                   />
                 </div>
               </div>
