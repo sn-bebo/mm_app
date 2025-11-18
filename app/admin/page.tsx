@@ -155,18 +155,18 @@ export default function AdminPage() {
   const isNewCity = formData.city && !cities.includes(formData.city);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-blue-500 hover:text-blue-600">
+            <Link href="/" className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
               ← Back
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">🔐 Admin Panel</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">🔐 Admin Panel</h1>
           </div>
           <Link
             href="/admin/manage"
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium text-sm"
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium text-sm"
           >
             📋 Manage Custom Entries
           </Link>
@@ -186,23 +186,23 @@ export default function AdminPage() {
             {message && (
               <div className={`mb-6 p-4 rounded-lg ${
                 message.type === 'success' 
-                  ? 'bg-green-50 border border-green-200 text-green-800' 
-                  : 'bg-red-50 border border-red-200 text-red-800'
+                  ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200' 
+                  : 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
               }`}>
                 {message.text}
               </div>
             )}
             
             {/* Form */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   {mode === 'edit' ? '✏️ Edit Entry' : '➕ Add New Entry'}
                 </h2>
                 {mode === 'edit' && (
                   <button
                     onClick={handleCancelEdit}
-                    className="text-sm text-gray-600 hover:text-gray-800"
+                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
                   >
                     Cancel Edit
                   </button>
@@ -241,7 +241,7 @@ export default function AdminPage() {
                     />
                     
                     {isNewCity && mode === 'add' && (
-                      <p className="text-sm text-amber-600">
+                      <p className="text-sm text-amber-600 dark:text-amber-400">
                         ℹ️ This will create a new city: <strong>{formData.city}</strong>
                       </p>
                     )}
@@ -279,7 +279,7 @@ export default function AdminPage() {
                     placeholder="e.g., Abaya-Thobe, Historical, Modern, etc."
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Use subcategories to group similar items together
                   </p>
                 </div>
@@ -311,7 +311,7 @@ export default function AdminPage() {
                     onChange={(e) => setFormData({ ...formData, details: e.target.value })}
                     placeholder="Add any relevant details, tips, or notes..."
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
                 </div>
                 
@@ -328,7 +328,7 @@ export default function AdminPage() {
                     placeholder="https://maps.google.com/..."
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Optional: Paste a Google Maps link for easy navigation
                   </p>
                 </div>
@@ -360,7 +360,7 @@ export default function AdminPage() {
                       setMessage(null);
                       if (mode === 'edit') handleCancelEdit();
                     }}
-                    className="px-6 py-3 rounded-lg font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+                    className="px-6 py-3 rounded-lg font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     Clear
                   </button>
@@ -369,9 +369,9 @@ export default function AdminPage() {
             </div>
             
             {/* Info Box */}
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-medium text-blue-900 mb-2">💡 Tips:</h3>
-              <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+            <div className="mt-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <h3 className="font-medium text-blue-900 dark:text-blue-200 mb-2">💡 Tips:</h3>
+              <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
                 <li>You can add new cities by typing them in the city field</li>
                 <li>Subcategories help organize items (e.g., "Historical", "Modern", "Luxury")</li>
                 <li>Click any item in the list to edit all its details</li>
@@ -382,19 +382,19 @@ export default function AdminPage() {
           
           {/* Right Column: Search & Edit List */}
           <div>
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">🔍 Search Items to Edit</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 sticky top-24">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">🔍 Search Items to Edit</h2>
               
               {/* Search Filters */}
               <div className="space-y-3 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Filter by City
                   </label>
                   <select
                     value={searchCity}
                     onChange={(e) => setSearchCity(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg text-sm"
                   >
                     <option value="">All Cities</option>
                     {cities.map(city => (
@@ -404,13 +404,13 @@ export default function AdminPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Filter by Category
                   </label>
                   <select
                     value={searchCategory}
                     onChange={(e) => setSearchCategory(e.target.value as CategoryType | 'all')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg text-sm"
                   >
                     <option value="all">All Categories</option>
                     <option value="places">🏛️ Places</option>
@@ -434,15 +434,15 @@ export default function AdminPage() {
               </div>
               
               {/* Results */}
-              <div className="border-t pt-4">
-                <p className="text-sm text-gray-600 mb-3">
+              <div className="border-t dark:border-gray-700 pt-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                   {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''} found
                   {filteredItems.length === 50 && ' (showing first 50)'}
                 </p>
                 
                 <div className="max-h-[600px] overflow-y-auto space-y-2">
                   {filteredItems.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-8">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
                       No items found. Try adjusting your filters.
                     </p>
                   ) : (
@@ -452,23 +452,23 @@ export default function AdminPage() {
                         onClick={() => handleEditItem(item)}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-colors ${
                           editingItemId === item.id
-                            ? 'border-green-500 bg-green-50'
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                            ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-medium text-gray-900 truncate text-sm">
+                              <h4 className="font-medium text-gray-900 dark:text-white truncate text-sm">
                                 {item.name}
                               </h4>
                               {item.isAdminAdded && (
-                                <span className="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded flex-shrink-0">
+                                <span className="text-xs bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded flex-shrink-0">
                                   Custom
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                               <span>{item.city}</span>
                               <span>•</span>
                               <span>
@@ -478,13 +478,13 @@ export default function AdminPage() {
                               </span>
                             </div>
                             {!item.location && (
-                              <span className="text-xs text-orange-600 mt-1 block">
+                              <span className="text-xs text-orange-600 dark:text-orange-400 mt-1 block">
                                 ⚠️ Missing map link
                               </span>
                             )}
                           </div>
                           {editingItemId === item.id && (
-                            <span className="text-green-600 text-xl flex-shrink-0">✓</span>
+                            <span className="text-green-600 dark:text-green-400 text-xl flex-shrink-0">✓</span>
                           )}
                         </div>
                       </button>
