@@ -1,0 +1,4 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm config set registry https://registry.npmjs.org/ && npm config set always-auth false && npm install"
+}
