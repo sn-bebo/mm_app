@@ -6,6 +6,7 @@ import { useCities } from '@/hooks/useItems';
 import { db } from '@/lib/db';
 import { CategoryType, TravelItem } from '@/types';
 import { useLiveQuery } from 'dexie-react-hooks';
+import ExportToExcel from '@/components/ExportToExcel';
 
 type FormMode = 'add' | 'edit';
 
@@ -173,6 +174,11 @@ export default function AdminPage() {
       </header>
       
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Export to Excel Component */}
+        <div className="mb-6">
+          <ExportToExcel />
+        </div>
+        
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: Form */}
           <div>
