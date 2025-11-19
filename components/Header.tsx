@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Settings, Moon, Sun } from 'lucide-react';
+import { Home, Settings, Moon, Sun, Info } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 
 interface HeaderProps {
@@ -33,6 +33,15 @@ export default function Header({ title, showHomeButton = false, showAdminButton 
         </div>
 
         <div className="flex items-center gap-2">
+          {/* About Button */}
+          <Link
+            href="/about"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            aria-label="About"
+          >
+            <Info className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+          </Link>
+
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}

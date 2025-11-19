@@ -36,12 +36,28 @@ export default function CityPage({ params }: { params: { city: string } }) {
   const [filterStatus, setFilterStatus] = useState<StatusType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Subcategory collapse state
+  const [collapsedSubcategories, setCollapsedSubcategories] = useState<Set<string>>(new Set());
+  const [isRegularItemsCollapsed, setIsRegularItemsCollapsed] = useState(false);
+  
   const { items: allItems } = useItems(decodedCity);
   const updateItem = useUpdateItem();
   
   const handleDelete = async (itemId: string) => {
     // Item will be automatically removed from the list due to live query
     // Just need to trigger a re-render if needed
+  };
+  
+  const toggleSubcategoryCollapse = (subcategory: string) => {
+    setCollapsedSubcategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(subcategory)) {
+        newSet.delete(subcategory);
+      } else {
+        newSet.add(subcategory);
+      }
+      return newSet;
+    });
   };
   
   // Apply global search first (across all categories in this city)
@@ -361,35 +377,10 @@ export default function CityPage({ params }: { params: { city: string } }) {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Regular Items */}
-            {sortedRegularItems.length > 0 && (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEndRegular}
-              >
-                <SortableContext
-                  items={sortedRegularItems.map(item => item.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-4">
-                    {sortedRegularItems.map((item) => (
-                      <DraggableItem key={item.id} id={item.id} isDraggingEnabled={isDraggingEnabled}>
-                        <ItemCard
-                          item={item}
-                          onUpdate={(updates) => handleUpdate(item.id, updates)}
-                          onDelete={() => handleDelete(item.id)}
-                        />
-                      </DraggableItem>
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
-            
-            {/* Subcategory Sections */}
+            {/* Subcategory Sections - Show first */}
             {Object.keys(sortedSubcategoryGroups).map((subcategoryName) => {
               const subcategoryItems = sortedSubcategoryGroups[subcategoryName];
+              const isCollapsed = collapsedSubcategories.has(subcategoryName);
               
               // Create unique drag handler for each subcategory
               const handleDragEndForSubcategory = async (event: DragEndEvent) => {
@@ -416,25 +407,96 @@ export default function CityPage({ params }: { params: { city: string } }) {
               
               return (
                 <div key={subcategoryName} className="mt-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="h-px bg-gray-300 flex-1"></div>
-                    <h2 className="text-lg font-bold text-purple-700 px-4 capitalize">
-                      {subcategoryName}
-                    </h2>
-                    <div className="h-px bg-gray-300 flex-1"></div>
-                  </div>
+                  <button
+                    onClick={() => toggleSubcategoryCollapse(subcategoryName)}
+                    className="w-full flex items-center gap-2 mb-4 hover:opacity-70 transition-opacity"
+                  >
+                    <div className="h-px bg-purple-300 dark:bg-purple-700 flex-1"></div>
+                    <div className="flex items-center gap-2 px-4">
+                      <span className="text-2xl">{isCollapsed ? '▶' : '▼'}</span>
+                      <h2 className="text-lg font-bold text-purple-700 dark:text-purple-400 capitalize">
+                        {subcategoryName}
+                      </h2>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        ({subcategoryItems.length})
+                      </span>
+                    </div>
+                    <div className="h-px bg-purple-300 dark:bg-purple-700 flex-1"></div>
+                  </button>
                   
+                  {!isCollapsed && (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEndForSubcategory}
+                    >
+                      <SortableContext
+                        items={subcategoryItems.map(item => item.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-4">
+                          {subcategoryItems.map((item) => (
+                            <DraggableItem key={item.id} id={item.id} isDraggingEnabled={isDraggingEnabled}>
+                              <ItemCard
+                                item={item}
+                                onUpdate={(updates) => handleUpdate(item.id, updates)}
+                                onDelete={() => handleDelete(item.id)}
+                              />
+                            </DraggableItem>
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  )}
+                </div>
+              );
+            })}
+            
+            {/* Regular Items - Show after subcategories */}
+            {sortedRegularItems.length > 0 && (
+              <div className="mt-8">
+                {/* Header for non-subcategorized items */}
+                <button
+                  onClick={() => setIsRegularItemsCollapsed(!isRegularItemsCollapsed)}
+                  className="w-full flex items-center gap-2 mb-4 hover:opacity-70 transition-opacity"
+                >
+                  <div className={`h-px flex-1 ${
+                    Object.keys(sortedSubcategoryGroups).length > 0 
+                      ? 'bg-gray-300 dark:bg-gray-700' 
+                      : 'bg-blue-300 dark:bg-blue-700'
+                  }`}></div>
+                  <div className="flex items-center gap-2 px-4">
+                    <span className="text-2xl">{isRegularItemsCollapsed ? '▶' : '▼'}</span>
+                    <h2 className={`text-lg font-bold px-4 ${
+                      Object.keys(sortedSubcategoryGroups).length > 0
+                        ? 'text-gray-600 dark:text-gray-400'
+                        : 'text-blue-700 dark:text-blue-400'
+                    }`}>
+                      {Object.keys(sortedSubcategoryGroups).length > 0 ? 'Other Items' : 'All Items'}
+                    </h2>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      ({sortedRegularItems.length})
+                    </span>
+                  </div>
+                  <div className={`h-px flex-1 ${
+                    Object.keys(sortedSubcategoryGroups).length > 0 
+                      ? 'bg-gray-300 dark:bg-gray-700' 
+                      : 'bg-blue-300 dark:bg-blue-700'
+                  }`}></div>
+                </button>
+                
+                {!isRegularItemsCollapsed && (
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
-                    onDragEnd={handleDragEndForSubcategory}
+                    onDragEnd={handleDragEndRegular}
                   >
                     <SortableContext
-                      items={subcategoryItems.map(item => item.id)}
+                      items={sortedRegularItems.map(item => item.id)}
                       strategy={verticalListSortingStrategy}
                     >
                       <div className="space-y-4">
-                        {subcategoryItems.map((item) => (
+                        {sortedRegularItems.map((item) => (
                           <DraggableItem key={item.id} id={item.id} isDraggingEnabled={isDraggingEnabled}>
                             <ItemCard
                               item={item}
@@ -446,9 +508,9 @@ export default function CityPage({ params }: { params: { city: string } }) {
                       </div>
                     </SortableContext>
                   </DndContext>
-                </div>
-              );
-            })}
+                )}
+              </div>
+            )}
           </div>
         )}
       </main>
