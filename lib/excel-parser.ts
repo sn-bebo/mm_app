@@ -72,30 +72,26 @@ export async function parseExcelFile(filePath: string): Promise<TravelItem[]> {
     // Get the first worksheet
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
     
-    // Convert to JSON
-    const rawData: any[] = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+    // Convert to JSON with headers
+    const jsonData: any[] = XLSX.utils.sheet_to_json(firstSheet);
     
-    // Skip header row and parse
+    // Parse items
     const items: TravelItem[] = [];
     let sortOrder = 0;
     
-    for (let i = 1; i < rawData.length; i++) {
-      const row = rawData[i];
-      
-      // Skip empty rows
-      if (!row || !row[0]) continue;
-      
-      const city = String(row[0] || '').trim();
-      const categoryRaw = String(row[1] || '').trim();
-      const name = String(row[2] || '').trim();
-      const details = String(row[3] || '').trim();
-      const location = String(row[4] || '').trim();
+    for (const row of jsonData) {
+      // Read fields by header name (case-insensitive)
+      const city = String(row['City'] || row['city'] || '').trim();
+      const categoryRaw = String(row['Category'] || row['category'] || '').trim();
+      const subcategory = String(row['Subcategory'] || row['subcategory'] || '').trim() || null;
+      const name = String(row['Name'] || row['name'] || '').trim();
+      const details = String(row['Details'] || row['details'] || '').trim();
+      const location = String(row['Location'] || row['location'] || '').trim();
       
       // Skip if essential fields are missing
       if (!city || !name) continue;
       
       const category = mapCategory(categoryRaw);
-      const subcategory = detectSubcategory(name, details);
       
       const item: TravelItem = {
         id: generateId(),
@@ -139,26 +135,23 @@ export async function parseExcelFileFromUpload(file: File): Promise<TravelItem[]
         const workbook = XLSX.read(data, { type: 'binary' });
         
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rawData: any[] = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        const jsonData: any[] = XLSX.utils.sheet_to_json(firstSheet);
         
         const items: TravelItem[] = [];
         let sortOrder = 0;
         
-        for (let i = 1; i < rawData.length; i++) {
-          const row = rawData[i];
-          
-          if (!row || !row[0]) continue;
-          
-          const city = String(row[0] || '').trim();
-          const categoryRaw = String(row[1] || '').trim();
-          const name = String(row[2] || '').trim();
-          const details = String(row[3] || '').trim();
-          const location = String(row[4] || '').trim();
+        for (const row of jsonData) {
+          // Read fields by header name (case-insensitive)
+          const city = String(row['City'] || row['city'] || '').trim();
+          const categoryRaw = String(row['Category'] || row['category'] || '').trim();
+          const subcategory = String(row['Subcategory'] || row['subcategory'] || '').trim() || null;
+          const name = String(row['Name'] || row['name'] || '').trim();
+          const details = String(row['Details'] || row['details'] || '').trim();
+          const location = String(row['Location'] || row['location'] || '').trim();
           
           if (!city || !name) continue;
           
           const category = mapCategory(categoryRaw);
-          const subcategory = detectSubcategory(name, details);
           
           const item: TravelItem = {
             id: generateId(),
