@@ -26,6 +26,7 @@ export interface TravelItem {
   rating: RatingType;                  // User's star rating
   userNotes: string;                   // User's personal notes
   sortOrder: number;                   // For manual ordering
+  isPinned: boolean;                   // Pin to top regardless of status
   
   // Metadata
   isAdminAdded: boolean;               // True if added via admin mode

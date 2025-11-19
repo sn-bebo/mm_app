@@ -114,7 +114,9 @@ export default function ItemCard({ item, onUpdate, onDelete, isExpanded: initial
   return (
     <div
       className={`bg-white dark:bg-gray-800 rounded-lg shadow border-2 transition-all ${
-        isCompleted 
+        item.isPinned
+          ? 'border-yellow-400 dark:border-yellow-600 shadow-yellow-200 dark:shadow-yellow-900'
+          : isCompleted 
           ? 'border-green-200 dark:border-green-800 opacity-75' 
           : item.priority === 'must' 
             ? 'border-red-200 dark:border-red-800' 
@@ -207,17 +209,30 @@ export default function ItemCard({ item, onUpdate, onDelete, isExpanded: initial
           </div>
           
           {/* Status Toggle */}
-          <button
-            onClick={toggleStatus}
-            className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all ${
-              isCompleted
-                ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-            title={isCompleted ? 'Mark as pending' : 'Mark as completed'}
-          >
-            {isCompleted ? '✓' : '○'}
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => onUpdate({ isPinned: !item.isPinned })}
+              className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-lg transition-all ${
+                item.isPinned
+                  ? 'bg-yellow-500 dark:bg-yellow-600 text-white hover:bg-yellow-600 dark:hover:bg-yellow-700'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+              title={item.isPinned ? 'Unpin from top' : 'Pin to top'}
+            >
+              📌
+            </button>
+            <button
+              onClick={toggleStatus}
+              className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all ${
+                isCompleted
+                  ? 'bg-green-500 dark:bg-green-600 text-white hover:bg-green-600 dark:hover:bg-green-700'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+              title={isCompleted ? 'Mark as pending' : 'Mark as completed'}
+            >
+              {isCompleted ? '✓' : '○'}
+            </button>
+          </div>
         </div>
         
         {/* Status Label and Priority */}

@@ -124,6 +124,7 @@ export default function AdminPage() {
           priority: null,
           userNotes: '',
           sortOrder: maxSortOrder + 1,
+          isPinned: false,
           isAdminAdded: true,
           createdAt: new Date(),
           updatedAt: new Date(),

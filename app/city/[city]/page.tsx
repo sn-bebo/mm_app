@@ -95,38 +95,54 @@ export default function CityPage({ params }: { params: { city: string } }) {
     return { regularItems: regular, subcategoryGroups: groups };
   }, [categoryItems]);
   
-  // Sort items: pending first, then completed
+  // Sort items: pinned first, then pending, then completed
   const sortItems = (items: TravelItem[]) => {
     let sorted = [...items];
     
-    // Apply sorting
-    switch (sortBy) {
-      case 'name':
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'rating':
-        sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case 'priority':
-        sorted.sort((a, b) => {
-          const priorityOrder = { must: 3, optional: 2, null: 1 };
-          return (priorityOrder[b.priority || 'null'] || 0) - (priorityOrder[a.priority || 'null'] || 0);
-        });
-        break;
-      case 'manual':
-      default:
-        sorted.sort((a, b) => a.sortOrder - b.sortOrder);
-        break;
-    }
+    // Separate pinned and unpinned items
+    const pinned = sorted.filter(item => item.isPinned);
+    const unpinned = sorted.filter(item => !item.isPinned);
     
-    // Always keep completed items at bottom (unless filtering by status)
+    // Sort pinned items
+    const sortByType = (itemsToSort: TravelItem[]) => {
+      const toSort = [...itemsToSort];
+      
+      switch (sortBy) {
+        case 'name':
+          toSort.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'rating':
+          toSort.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+          break;
+        case 'priority':
+          toSort.sort((a, b) => {
+            const priorityOrder = { must: 3, optional: 2, null: 1 };
+            return (priorityOrder[b.priority || 'null'] || 0) - (priorityOrder[a.priority || 'null'] || 0);
+          });
+          break;
+        case 'manual':
+        default:
+          toSort.sort((a, b) => a.sortOrder - b.sortOrder);
+          break;
+      }
+      
+      return toSort;
+    };
+    
+    // Sort both groups
+    const sortedPinned = sortByType(pinned);
+    const sortedUnpinned = sortByType(unpinned);
+    
+    // For unpinned items, keep completed items at bottom (unless filtering by status)
     if (filterStatus === 'all') {
-      const pending = sorted.filter(item => item.status === 'pending');
-      const completed = sorted.filter(item => item.status !== 'pending');
-      return [...pending, ...completed];
+      const pending = sortedUnpinned.filter(item => item.status === 'pending');
+      const completed = sortedUnpinned.filter(item => item.status !== 'pending');
+      // Pinned items stay at top regardless of status
+      return [...sortedPinned, ...pending, ...completed];
     }
     
-    return sorted;
+    // If filtering by status, just keep pinned at top
+    return [...sortedPinned, ...sortedUnpinned];
   };
   
   const sortedRegularItems = useMemo(() => sortItems(regularItems), [regularItems, sortBy, filterStatus]);

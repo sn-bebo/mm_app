@@ -110,6 +110,7 @@ export async function parseExcelFile(filePath: string): Promise<TravelItem[]> {
         rating: null,
         userNotes: '',
         sortOrder: sortOrder++,
+        isPinned: false,
         isAdminAdded: false,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -172,6 +173,7 @@ export async function parseExcelFileFromUpload(file: File): Promise<TravelItem[]
             rating: null,
             userNotes: '',
             sortOrder: sortOrder++,
+            isPinned: false,
             isAdminAdded: false,
             createdAt: new Date(),
             updatedAt: new Date()

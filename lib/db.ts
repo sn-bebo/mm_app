@@ -16,6 +16,17 @@ export class TravelDatabase extends Dexie {
       items: 'id, city, category, subcategory, status, priority, rating, sortOrder, isAdminAdded, updatedAt',
       settings: 'id'
     });
+    
+    // Version 2: Add isPinned field
+    this.version(2).stores({
+      items: 'id, city, category, subcategory, status, priority, rating, sortOrder, isAdminAdded, isPinned, updatedAt',
+      settings: 'id'
+    }).upgrade(tx => {
+      // Add isPinned = false to all existing items
+      return tx.table('items').toCollection().modify(item => {
+        item.isPinned = false;
+      });
+    });
   }
 }
 

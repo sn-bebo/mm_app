@@ -18,6 +18,13 @@ export async function POST(request: NextRequest) {
       Name: item.name,
       Details: item.details || '',
       Location: item.location || '',
+      Status: item.status || 'pending',
+      Priority: item.priority || '',
+      Rating: item.rating || '',
+      UserNotes: item.userNotes || '',
+      SortOrder: item.sortOrder || 0,
+      IsPinned: item.isPinned ? 'Yes' : 'No',
+      IsAdminAdded: item.isAdminAdded ? 'Yes' : 'No',
     }));
     
     // Create workbook and worksheet
