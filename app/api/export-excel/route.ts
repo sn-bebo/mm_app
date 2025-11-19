@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     const worksheetData = items.map((item: any) => ({
       City: item.city,
       Category: item.category,
+      Subcategory: item.subcategory || '',
       Name: item.name,
       Details: item.details || '',
       Location: item.location || '',
