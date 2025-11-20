@@ -17,7 +17,7 @@ export default function Header({ title, showHomeButton = false, showAdminButton 
   const isAdminPage = pathname?.startsWith('/admin');
 
   return (
-    <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-10 transition-colors">
+    <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {showHomeButton && (

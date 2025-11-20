@@ -39,7 +39,7 @@ export default function DraggableItem({ id, children, isDraggingEnabled }: Dragg
       <div
         {...attributes}
         {...listeners}
-        className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing hover:bg-gray-100 rounded-l-lg z-10"
+        className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing hover:bg-gray-100 rounded-l-lg z-0"
         title="Drag to reorder"
       >
         <div className="text-gray-400 text-xl">⋮⋮</div>

@@ -263,7 +263,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
       <Header title={decodedCity} showHomeButton={true} showAdminButton={true} />
       
       {/* Category Tabs */}
-      <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-[73px] z-10">
+      <div className="bg-white dark:bg-gray-900 border-b dark:border-gray-800 sticky top-[73px] z-40">
         <div className="max-w-7xl mx-auto px-4">
           {/* Search Results Summary */}
           {searchQuery && (
