@@ -36,7 +36,7 @@ export default function Header({ title, showHomeButton = false, showAdminButton 
           {/* About Button */}
           <Link
             href="/about"
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors flex items-center justify-center"
             aria-label="About"
           >
             <Info className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -45,7 +45,7 @@ export default function Header({ title, showHomeButton = false, showAdminButton 
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors flex items-center justify-center"
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
             {mounted && (
@@ -61,7 +61,7 @@ export default function Header({ title, showHomeButton = false, showAdminButton 
           {showAdminButton && (
             <Link
               href={isAdminPage ? '/' : '/admin'}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors flex items-center justify-center"
               aria-label={isAdminPage ? 'Exit Admin' : 'Admin Panel'}
             >
               <Settings className="w-5 h-5 text-gray-700 dark:text-gray-300" />

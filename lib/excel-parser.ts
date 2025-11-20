@@ -77,7 +77,7 @@ export async function parseExcelFile(filePath: string): Promise<TravelItem[]> {
     
     // Parse items
     const items: TravelItem[] = [];
-    let sortOrder = 0;
+    let autoSortOrder = 0;
     
     for (const row of jsonData) {
       // Read fields by header name (case-insensitive)
@@ -87,6 +87,11 @@ export async function parseExcelFile(filePath: string): Promise<TravelItem[]> {
       const name = String(row['Name'] || row['name'] || '').trim();
       const details = String(row['Details'] || row['details'] || '').trim();
       const location = String(row['Location'] || row['location'] || '').trim();
+      
+      // Read SortOrder, IsPinned, IsAdminAdded from Excel if available
+      const sortOrderFromExcel = row['SortOrder'] || row['sortorder'] || row['sortOrder'];
+      const isPinnedRaw = String(row['IsPinned'] || row['ispinned'] || row['isPinned'] || '').trim().toLowerCase();
+      const isAdminAddedRaw = String(row['IsAdminAdded'] || row['isadminadded'] || row['isAdminAdded'] || '').trim().toLowerCase();
       
       // Skip if essential fields are missing
       if (!city || !name) continue;
@@ -105,9 +110,9 @@ export async function parseExcelFile(filePath: string): Promise<TravelItem[]> {
         priority: null,
         rating: null,
         userNotes: '',
-        sortOrder: sortOrder++,
-        isPinned: false,
-        isAdminAdded: false,
+        sortOrder: sortOrderFromExcel !== undefined ? Number(sortOrderFromExcel) : autoSortOrder++,
+        isPinned: isPinnedRaw === 'yes' || isPinnedRaw === 'true' || isPinnedRaw === '1',
+        isAdminAdded: isAdminAddedRaw === 'yes' || isAdminAddedRaw === 'true' || isAdminAddedRaw === '1',
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -138,7 +143,7 @@ export async function parseExcelFileFromUpload(file: File): Promise<TravelItem[]
         const jsonData: any[] = XLSX.utils.sheet_to_json(firstSheet);
         
         const items: TravelItem[] = [];
-        let sortOrder = 0;
+        let autoSortOrder = 0;
         
         for (const row of jsonData) {
           // Read fields by header name (case-insensitive)
@@ -148,6 +153,11 @@ export async function parseExcelFileFromUpload(file: File): Promise<TravelItem[]
           const name = String(row['Name'] || row['name'] || '').trim();
           const details = String(row['Details'] || row['details'] || '').trim();
           const location = String(row['Location'] || row['location'] || '').trim();
+          
+          // Read SortOrder, IsPinned, IsAdminAdded from Excel if available
+          const sortOrderFromExcel = row['SortOrder'] || row['sortorder'] || row['sortOrder'];
+          const isPinnedRaw = String(row['IsPinned'] || row['ispinned'] || row['isPinned'] || '').trim().toLowerCase();
+          const isAdminAddedRaw = String(row['IsAdminAdded'] || row['isadminadded'] || row['isAdminAdded'] || '').trim().toLowerCase();
           
           if (!city || !name) continue;
           
@@ -165,9 +175,9 @@ export async function parseExcelFileFromUpload(file: File): Promise<TravelItem[]
             priority: null,
             rating: null,
             userNotes: '',
-            sortOrder: sortOrder++,
-            isPinned: false,
-            isAdminAdded: false,
+            sortOrder: sortOrderFromExcel !== undefined ? Number(sortOrderFromExcel) : autoSortOrder++,
+            isPinned: isPinnedRaw === 'yes' || isPinnedRaw === 'true' || isPinnedRaw === '1',
+            isAdminAdded: isAdminAddedRaw === 'yes' || isAdminAddedRaw === 'true' || isAdminAddedRaw === '1',
             createdAt: new Date(),
             updatedAt: new Date()
           };

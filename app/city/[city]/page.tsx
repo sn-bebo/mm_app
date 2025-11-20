@@ -274,10 +274,10 @@ export default function CityPage({ params }: { params: { city: string } }) {
             </div>
           )}
           
-          <div className="flex gap-1 md:gap-2 overflow-x-auto">
+          <div className="flex gap-0.5 md:gap-2 overflow-x-auto">
             <button
               onClick={() => setSelectedCategory('places')}
-              className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
+              className={`px-2 sm:px-3 md:px-6 py-2 md:py-3 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
                 selectedCategory === 'places'
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -287,7 +287,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
             </button>
             <button
               onClick={() => setSelectedCategory('shopping')}
-              className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
+              className={`px-2 sm:px-3 md:px-6 py-2 md:py-3 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
                 selectedCategory === 'shopping'
                   ? 'border-purple-500 text-purple-600 dark:text-purple-400'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -297,7 +297,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
             </button>
             <button
               onClick={() => setSelectedCategory('food')}
-              className={`px-3 md:px-6 py-2 md:py-3 text-sm md:text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
+              className={`px-2 sm:px-3 md:px-6 py-2 md:py-3 text-xs sm:text-sm md:text-base font-medium whitespace-nowrap border-b-2 transition-colors ${
                 selectedCategory === 'food'
                   ? 'border-orange-500 text-orange-600 dark:text-orange-400'
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
